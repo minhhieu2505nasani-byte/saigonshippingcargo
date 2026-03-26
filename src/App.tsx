@@ -185,7 +185,7 @@ export default function App() {
     { id: 'overview', label: 'Tổng quan', icon: BookOpen },
     { id: 'buy-list', label: 'Danh sách mua hộ', icon: Search, group: 'API Mua Hộ' },
     { id: 'buy-create', label: 'Đăng đơn mua hộ', icon: PlusCircle, group: 'API Mua Hộ' },
-    // { id: 'consignment-list', label: 'Danh sách ký gửi', icon: Package, group: 'API Ký Gửi' },
+    { id: 'consignment-list', label: 'Danh sách ký gửi', icon: Package, group: 'API Ký Gửi' },
     { id: 'consignment-create', label: 'Đăng đơn ký gửi', icon: ArrowRight, group: 'API Ký Gửi' },
   ];
 
@@ -288,6 +288,33 @@ export default function App() {
                   }
                 ]
               }}
+              responseFields={[
+                { name: 'success', type: 'boolean', required: true, description: 'Trạng thái phản hồi' },
+                { name: 'data', type: 'array', required: true, description: 'Danh sách đơn mua hộ' },
+                { name: 'data[].order_id', type: 'string', required: true, description: 'Mã đơn mua hộ' },
+                { name: 'data[].email', type: 'string', required: true, description: 'Email khách hàng' },
+                { name: 'data[].current_status', type: 'string', required: true, description: 'Trạng thái hiện tại của đơn hàng' },
+                { name: 'data[].is_purchased', type: 'number', required: true, description: 'Trạng thái đã mua hàng (1: đã mua, 0: chưa mua)' },
+                { name: 'data[].is_in_warehouse', type: 'number', required: true, description: 'Trạng thái đã nhận kho (1: đã nhận, 0: chưa nhận)' },
+                { name: 'data[].is_cancelled', type: 'number', required: true, description: 'Trạng thái hủy đơn (1: đã hủy, 0: chưa hủy)' },
+                { name: 'data[].shipping_information', type: 'object', required: true, description: 'Thông tin giao hàng' },
+                { name: 'data[].shipping_information.confirmation_date', type: 'string', required: true, description: 'Ngày xác nhận' },
+                { name: 'data[].shipping_information.sender', type: 'object', required: true, description: 'Thông tin người gửi' },
+                { name: 'data[].shipping_information.recipient', type: 'object', required: true, description: 'Thông tin người nhận' },
+                { name: 'data[].products', type: 'array', required: true, description: 'Danh sách sản phẩm' },
+                { name: 'data[].products[].product_name', type: 'string', required: true, description: 'Tên sản phẩm' },
+                { name: 'data[].products[].price_usd', type: 'number', required: true, description: 'Giá sản phẩm (USD)' },
+                { name: 'data[].products[].quantity', type: 'number', required: true, description: 'Số lượng' },
+                { name: 'data[].products[].supplier', type: 'string', required: true, description: 'Nhà cung cấp' },
+                { name: 'data[].products[].markup_percentage', type: 'number', required: true, description: 'Phần trăm phụ phí' },
+                { name: 'data[].products[].costs', type: 'object', required: true, description: 'Chi tiết chi phí' },
+                { name: 'data[].products[].total_amount_usd', type: 'number', required: true, description: 'Tổng tiền (USD)' },
+                { name: 'data[].products[].total_amount_vnd', type: 'number', required: true, description: 'Tổng tiền (VND)' },
+                { name: 'data[].summary', type: 'object', required: true, description: 'Tổng kết đơn hàng' },
+                { name: 'data[].summary.total_usd', type: 'number', required: true, description: 'Tổng tiền toàn đơn (USD)' },
+                { name: 'data[].summary.total_vnd', type: 'number', required: true, description: 'Tổng tiền toàn đơn (VND)' },
+                { name: 'data[].summary.payment_status', type: 'string', required: true, description: 'Trạng thái thanh toán' },
+              ]}
             />
           </motion.div>
         );
@@ -403,28 +430,29 @@ export default function App() {
               path="/consignment-requests"
               title="Lấy danh sách ký gửi"
               description="Xem tất cả các đơn hàng ký gửi của bạn và theo dõi hành trình của chúng."
-              params={[
-                { name: 'order_id', type: 'string', required: false, description: 'Mã đơn ký gửi' },
-                { name: 'email', type: 'string', required: false, description: 'Email khách hàng' },
-                { name: 'tracking_number', type: 'string', required: false, description: 'Mã vận đơn nội địa' },
-                { name: 'status', type: 'string', required: false, description: 'Trạng thái (đã nhận kho, đang về...)' },
-                { name: 'from_date', type: 'string (ISO)', required: false, description: 'Ngày bắt đầu lọc (YYYY-MM-DD)' },
-                { name: 'to_date', type: 'string (ISO)', required: false, description: 'Ngày kết thúc lọc (YYYY-MM-DD)' },
-                { name: 'page', type: 'number', required: false, description: 'Trang hiện tại (mặc định: 1)' },
-                { name: 'limit', type: 'number', required: false, description: 'Số lượng bản ghi trên mỗi trang (mặc định: 20)' },
-              ]}
               response={{
-                success: true,
-                data: [
+                "consignment_code": "SGS_KG_MCFYX_13",
+                "package_status": "",
+                "payment_status": "",
+                "consignment": [
                   {
-                    id: "CON-999",
-                    tracking_number: "TRACK123456",
-                    weight: 2.5,
-                    status: "đang về",
-                    updated_at: "2024-03-22T15:30:00Z"
+                    "code_tracking": "TK_HAGSY",
+                    "goods_declaration": "San pham 1,San pham 2"
+                  },
+                  {
+                    "code_tracking": "TK_KA72J",
+                    "goods_declaration": "San pham 3,San pham 4"
                   }
                 ]
               }}
+              responseFields={[
+                { name: 'consignment_code', type: 'string', required: true, description: 'Mã kiện hàng ký gửi' },
+                { name: 'package_status', type: 'string', required: false, description: 'Trạng thái kiện hàng' },
+                { name: 'payment_status', type: 'string', required: false, description: 'Trạng thái thanh toán' },
+                { name: 'consignment', type: 'array', required: true, description: 'Danh sách các mã vận đơn (tracking) thuộc kiện hàng' },
+                { name: 'consignment[].code_tracking', type: 'string', required: true, description: 'Mã vận đơn nội địa' },
+                { name: 'consignment[].goods_declaration', type: 'string', required: true, description: 'Khai báo hàng hóa' },
+              ]}
             />
           </motion.div>
         );
